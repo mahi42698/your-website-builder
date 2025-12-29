@@ -1,12 +1,13 @@
-import { Leaf, Menu, X } from "lucide-react";
+import { Leaf, Menu, X, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { href: "#features", label: "Features" },
-  { href: "#problem", label: "Challenge" },
-  { href: "#technology", label: "Technology" },
-  { href: "#team", label: "Team" },
+  { href: "/#features", label: "Features" },
+  { href: "/#problem", label: "Challenge" },
+  { href: "/#technology", label: "Technology" },
+  { href: "/#team", label: "Team" },
 ];
 
 export const Navbar = () => {
@@ -17,14 +18,14 @@ export const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group">
             <div className="w-10 h-10 rounded-lg bg-gradient-accent flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300">
               <Leaf className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-display font-bold text-foreground">
               Agro<span className="text-primary">AI</span>
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
@@ -40,10 +41,13 @@ export const Navbar = () => {
           </div>
 
           {/* CTA Button */}
-          <div className="hidden md:block">
-            <Button variant="hero" size="default">
-              Get Started
-            </Button>
+          <div className="hidden md:flex items-center gap-4">
+            <Link to="/crop-advisor">
+              <Button variant="hero" size="default" className="gap-2">
+                <Sparkles className="w-4 h-4" />
+                AI Crop Advisor
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -70,9 +74,12 @@ export const Navbar = () => {
                   {link.label}
                 </a>
               ))}
-              <Button variant="hero" size="lg" className="mt-2">
-                Get Started
-              </Button>
+              <Link to="/crop-advisor" onClick={() => setIsOpen(false)}>
+                <Button variant="hero" size="lg" className="mt-2 w-full gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  AI Crop Advisor
+                </Button>
+              </Link>
             </div>
           </div>
         )}
