@@ -19,60 +19,94 @@ export const TeamSection = () => {
         </div>
 
         {/* Team Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Student Card */}
-          <div className="bg-gradient-card rounded-3xl p-8 border border-border hover:shadow-medium transition-all duration-300">
-            <div className="flex items-start gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <User className="w-10 h-10 text-primary" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {/* Lead Researcher Card */}
+          <div className="bg-gradient-card rounded-3xl p-6 border border-border hover:shadow-medium transition-all duration-300">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                <User className="w-8 h-8 text-primary" />
               </div>
-              <div className="flex-1">
-                <h3 className="font-display text-xl font-bold text-foreground mb-1">
-                  MD. Mahiur Rahman
-                </h3>
-                <p className="text-primary font-medium mb-4">Researcher & Developer</p>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4" />
-                    <span>B.Sc. in Computer Science & Engineering</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4" />
-                    <span>Varendra University, Rajshahi</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>7th Semester, Section D</span>
-                  </div>
+              <h3 className="font-display text-lg font-bold text-foreground mb-1">
+                MD. Mahiur Rahman
+              </h3>
+              <p className="text-primary font-medium text-sm mb-3">Lead Researcher</p>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 justify-center">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>B.Sc. in CSE</span>
+                </div>
+                <div className="flex items-center gap-1.5 justify-center">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Varendra University</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Team Member 1 */}
+          <div className="bg-gradient-card rounded-3xl p-6 border border-border hover:shadow-medium transition-all duration-300">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-leaf/10 flex items-center justify-center mb-4">
+                <User className="w-8 h-8 text-leaf" />
+              </div>
+              <h3 className="font-display text-lg font-bold text-foreground mb-1">
+                MST. Asifa Ashrafi
+              </h3>
+              <p className="text-leaf font-medium text-sm mb-3">Team Member</p>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 justify-center">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>B.Sc. in CSE</span>
+                </div>
+                <div className="flex items-center gap-1.5 justify-center">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Varendra University</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Team Member 2 */}
+          <div className="bg-gradient-card rounded-3xl p-6 border border-border hover:shadow-medium transition-all duration-300">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-harvest/10 flex items-center justify-center mb-4">
+                <User className="w-8 h-8 text-harvest" />
+              </div>
+              <h3 className="font-display text-lg font-bold text-foreground mb-1">
+                Sadman Israk Rahim
+              </h3>
+              <p className="text-harvest font-medium text-sm mb-3">Team Member</p>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 justify-center">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>B.Sc. in CSE</span>
+                </div>
+                <div className="flex items-center gap-1.5 justify-center">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Varendra University</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Supervisor Card */}
-          <div className="bg-gradient-card rounded-3xl p-8 border border-border hover:shadow-medium transition-all duration-300">
-            <div className="flex items-start gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
-                <GraduationCap className="w-10 h-10 text-accent" />
+          <div className="bg-gradient-card rounded-3xl p-6 border border-border hover:shadow-medium transition-all duration-300">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
+                <GraduationCap className="w-8 h-8 text-accent" />
               </div>
-              <div className="flex-1">
-                <h3 className="font-display text-xl font-bold text-foreground mb-1">
-                  A.S.M. Delwar Hossain
-                </h3>
-                <p className="text-accent font-medium mb-4">Project Supervisor</p>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    <span>Lecturer</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4" />
-                    <span>Department of CSE</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4" />
-                    <span>Varendra University, Rajshahi</span>
-                  </div>
+              <h3 className="font-display text-lg font-bold text-foreground mb-1">
+                Akib Ikbal
+              </h3>
+              <p className="text-accent font-medium text-sm mb-3">Project Supervisor</p>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 justify-center">
+                  <User className="w-3.5 h-3.5" />
+                  <span>Lecturer, Dept. of CSE</span>
+                </div>
+                <div className="flex items-center gap-1.5 justify-center">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Varendra University</span>
                 </div>
               </div>
             </div>
