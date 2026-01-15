@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { href: "/#features", label: "Features" },
+  { href: "/#hardware", label: "Hardware" },
   { href: "/#problem", label: "Challenge" },
   { href: "/#technology", label: "Technology" },
   { href: "/#team", label: "Team" },
@@ -42,6 +43,11 @@ export const Navbar = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-4">
+            <Link to="/iot-dashboard">
+              <Button variant="outline" size="default">
+                IoT Dashboard
+              </Button>
+            </Link>
             <Link to="/crop-advisor">
               <Button variant="hero" size="default" className="gap-2">
                 <Sparkles className="w-4 h-4" />
@@ -74,6 +80,11 @@ export const Navbar = () => {
                   {link.label}
                 </a>
               ))}
+              <Link to="/iot-dashboard" onClick={() => setIsOpen(false)}>
+                <Button variant="outline" size="lg" className="mt-2 w-full">
+                  IoT Dashboard
+                </Button>
+              </Link>
               <Link to="/crop-advisor" onClick={() => setIsOpen(false)}>
                 <Button variant="hero" size="lg" className="mt-2 w-full gap-2">
                   <Sparkles className="w-4 h-4" />
