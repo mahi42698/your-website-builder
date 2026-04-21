@@ -43,7 +43,7 @@ export const Navbar = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/iot-dashboard">
+            <Link to="/dashboard">
               <Button variant="outline" size="default">
                 IoT Dashboard
               </Button>
@@ -80,7 +80,7 @@ export const Navbar = () => {
                   {link.label}
                 </a>
               ))}
-              <Link to="/iot-dashboard" onClick={() => setIsOpen(false)}>
+              <Link to="/dashboard" onClick={() => setIsOpen(false)}>
                 <Button variant="outline" size="lg" className="mt-2 w-full">
                   IoT Dashboard
                 </Button>

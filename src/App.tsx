@@ -7,6 +7,12 @@ import Index from "./pages/Index";
 import CropAdvisor from "./pages/CropAdvisor";
 import IoTDashboard from "./pages/IoTDashboard";
 import NotFound from "./pages/NotFound";
+import { DashboardLayout } from "./components/dashboard/DashboardLayout";
+import Overview from "./pages/dashboard/Overview";
+import DiseaseDetection from "./pages/dashboard/DiseaseDetection";
+import Sensors from "./pages/dashboard/Sensors";
+import Devices from "./pages/dashboard/Devices";
+import History from "./pages/dashboard/History";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +26,13 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/crop-advisor" element={<CropAdvisor />} />
           <Route path="/iot-dashboard" element={<IoTDashboard />} />
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Overview />} />
+            <Route path="disease" element={<DiseaseDetection />} />
+            <Route path="sensors" element={<Sensors />} />
+            <Route path="devices" element={<Devices />} />
+            <Route path="history" element={<History />} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
