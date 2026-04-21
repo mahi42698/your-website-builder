@@ -1,1 +1,4 @@
-project_id = "ckhfigacvfcsowduvkjj"
+project_id = "lovable"
+
+[functions.esp32-ingest]
+verify_jwt = false
