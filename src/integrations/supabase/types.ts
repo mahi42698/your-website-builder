@@ -14,7 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      devices: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          is_online: boolean
+          last_seen: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          is_online?: boolean
+          last_seen?: string | null
+          name?: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          is_online?: boolean
+          last_seen?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      disease_predictions: {
+        Row: {
+          confidence: number
+          created_at: string
+          device_id: string | null
+          id: string
+          image_path: string
+          image_url: string | null
+          is_healthy: boolean
+          model_version: string | null
+          predicted_class: string
+          recommendation: string | null
+        }
+        Insert: {
+          confidence: number
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          image_path: string
+          image_url?: string | null
+          is_healthy?: boolean
+          model_version?: string | null
+          predicted_class: string
+          recommendation?: string | null
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          image_path?: string
+          image_url?: string | null
+          is_healthy?: boolean
+          model_version?: string | null
+          predicted_class?: string
+          recommendation?: string | null
+        }
+        Relationships: []
+      }
+      sensor_readings: {
+        Row: {
+          device_id: string
+          humidity: number | null
+          id: string
+          light_intensity: number | null
+          recorded_at: string
+          soil_moisture: number | null
+          temperature: number | null
+        }
+        Insert: {
+          device_id: string
+          humidity?: number | null
+          id?: string
+          light_intensity?: number | null
+          recorded_at?: string
+          soil_moisture?: number | null
+          temperature?: number | null
+        }
+        Update: {
+          device_id?: string
+          humidity?: number | null
+          id?: string
+          light_intensity?: number | null
+          recorded_at?: string
+          soil_moisture?: number | null
+          temperature?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
