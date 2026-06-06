@@ -13,6 +13,7 @@ export default function DiseaseDetection() {
   const [prediction, setPrediction] = useState<DiseasePrediction | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const { data: history } = usePredictions(8);
 
   const handleFile = (file: File) => {
@@ -62,6 +63,14 @@ export default function DiseaseDetection() {
               className="hidden"
               onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
             />
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+            />
             <div className="aspect-video rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/30 overflow-hidden">
               {imageUrl ? (
                 <img src={imageUrl} alt="Leaf to analyze" className="w-full h-full object-contain" />
@@ -69,16 +78,20 @@ export default function DiseaseDetection() {
                 <div className="text-center text-muted-foreground p-8">
                   <Leaf className="w-12 h-12 mx-auto mb-2 opacity-40" />
                   <p className="text-sm">No image selected</p>
+                  <p className="text-xs mt-1">Tap "Take Photo" on your phone to capture a leaf</p>
                 </div>
               )}
             </div>
-            <div className="flex gap-2 mt-4">
-              <Button onClick={() => fileRef.current?.click()} variant="outline" className="flex-1 gap-2">
-                <Upload className="w-4 h-4" /> Upload Image
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <Button onClick={() => cameraRef.current?.click()} className="gap-2">
+                <Camera className="w-4 h-4" /> Take Photo
               </Button>
-              <Button onClick={analyze} disabled={!imageUrl || analyzing} className="flex-1 gap-2">
+              <Button onClick={() => fileRef.current?.click()} variant="outline" className="gap-2">
+                <Upload className="w-4 h-4" /> Upload
+              </Button>
+              <Button onClick={analyze} disabled={!imageUrl || analyzing} className="col-span-2 gap-2">
                 {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
-                {analyzing ? "Analyzing..." : "Run CNN"}
+                {analyzing ? "Analyzing leaf with CNN..." : "Detect Disease (Run CNN)"}
               </Button>
             </div>
           </CardContent>
