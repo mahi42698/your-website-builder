@@ -313,7 +313,7 @@ export default function CropAdvisor() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {mockRecommendations.recommendedCrops.map((crop, index) => (
+                    {(recommendations!).recommendedCrops.map((crop, index) => (
                       <Card 
                         key={crop.name} 
                         className={`border-2 ${index === 0 ? 'border-primary bg-primary/5' : 'border-border'}`}
@@ -369,19 +369,19 @@ export default function CropAdvisor() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 rounded-lg bg-muted/50">
                         <span className="text-sm text-muted-foreground">pH Level</span>
-                        <p className="text-xl font-bold text-foreground">{mockRecommendations.soilHealth.ph}</p>
+                        <p className="text-xl font-bold text-foreground">{(recommendations!).soilHealth.ph}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-muted/50">
                         <span className="text-sm text-muted-foreground">Nitrogen</span>
-                        <p className="text-xl font-bold text-foreground">{mockRecommendations.soilHealth.nitrogen}</p>
+                        <p className="text-xl font-bold text-foreground">{(recommendations!).soilHealth.nitrogen}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-muted/50">
                         <span className="text-sm text-muted-foreground">Phosphorus</span>
-                        <p className="text-xl font-bold text-harvest">{mockRecommendations.soilHealth.phosphorus}</p>
+                        <p className="text-xl font-bold text-harvest">{(recommendations!).soilHealth.phosphorus}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-muted/50">
                         <span className="text-sm text-muted-foreground">Potassium</span>
-                        <p className="text-xl font-bold text-leaf">{mockRecommendations.soilHealth.potassium}</p>
+                        <p className="text-xl font-bold text-leaf">{(recommendations!).soilHealth.potassium}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -397,7 +397,7 @@ export default function CropAdvisor() {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-3">
-                      {mockRecommendations.warnings.map((warning, index) => (
+                      {(recommendations!).warnings.map((warning, index) => (
                         <li key={index} className="flex items-start gap-3 p-3 rounded-lg bg-harvest/10">
                           <AlertTriangle className="w-4 h-4 text-harvest mt-0.5 flex-shrink-0" />
                           <span className="text-sm text-foreground">{warning}</span>
@@ -418,7 +418,7 @@ export default function CropAdvisor() {
                 </CardHeader>
                 <CardContent>
                   <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {mockRecommendations.tips.map((tip, index) => (
+                    {(recommendations!).tips.map((tip, index) => (
                       <li key={index} className="flex items-start gap-3 p-4 rounded-lg bg-leaf/5 border border-leaf/20">
                         <span className="w-6 h-6 rounded-full bg-leaf/20 flex items-center justify-center text-leaf font-bold text-sm flex-shrink-0">
                           {index + 1}
