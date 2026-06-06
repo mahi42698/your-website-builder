@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sprout, Droplets, Cloud } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-farming.jpg";
 
 export const HeroSection = () => {
@@ -56,13 +57,17 @@ export const HeroSection = () => {
 
           {/* CTAs */}
           <div className="animate-fade-up-delayed flex flex-col sm:flex-row gap-4" style={{ animationDelay: '0.4s' }}>
-            <Button variant="hero" size="xl">
-              Explore Features
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-            <Button variant="heroOutline" size="xl">
-              View Research
-            </Button>
+            <Link to="/crop-advisor">
+              <Button variant="hero" size="xl" className="w-full sm:w-auto">
+                Try AI Crop Advisor
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link to="/dashboard">
+              <Button variant="heroOutline" size="xl" className="w-full sm:w-auto">
+                Open IoT Dashboard
+              </Button>
+            </Link>
           </div>
 
           {/* Stats */}

@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { 
   Leaf, 
   Droplets, 
@@ -21,33 +23,17 @@ import {
   Loader2
 } from "lucide-react";
 
-// Mock AI recommendation data
-const mockRecommendations = {
-  recommendedCrops: [
-    { name: "Rice (Aman)", confidence: 95, season: "Monsoon", profit: "High" },
-    { name: "Jute", confidence: 88, season: "Pre-monsoon", profit: "Medium" },
-    { name: "Vegetables (Mixed)", confidence: 82, season: "Year-round", profit: "High" },
-  ],
-  soilHealth: {
-    ph: 6.5,
-    nitrogen: "Medium",
-    phosphorus: "Low",
-    potassium: "High",
-  },
-  warnings: [
-    "Phosphorus levels are low - consider adding bone meal or rock phosphite",
-    "Monitor water levels during dry season",
-  ],
-  tips: [
-    "Rotate crops to maintain soil health",
-    "Consider intercropping with legumes to fix nitrogen naturally",
-    "Optimal planting window: Next 2-3 weeks",
-  ],
+type Recommendation = {
+  recommendedCrops: { name: string; confidence: number; season: string; profit: string; reason?: string }[];
+  soilHealth: { ph: number; nitrogen: string; phosphorus: string; potassium: string };
+  warnings: string[];
+  tips: string[];
 };
 
 export default function CropAdvisor() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [recommendations, setRecommendations] = useState<Recommendation | null>(null);
   const [formData, setFormData] = useState({
     location: "",
     soilType: "",
@@ -62,16 +48,23 @@ export default function CropAdvisor() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAnalyzing(true);
-    
-    // Simulate AI processing
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-    
-    setIsAnalyzing(false);
-    setShowResults(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("crop-advisor", { body: formData });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setRecommendations(data as Recommendation);
+      setShowResults(true);
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not generate recommendations. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleReset = () => {
     setShowResults(false);
+    setRecommendations(null);
     setFormData({
       location: "",
       soilType: "",
@@ -320,7 +313,7 @@ export default function CropAdvisor() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {mockRecommendations.recommendedCrops.map((crop, index) => (
+                    {(recommendations!).recommendedCrops.map((crop, index) => (
                       <Card 
                         key={crop.name} 
                         className={`border-2 ${index === 0 ? 'border-primary bg-primary/5' : 'border-border'}`}
@@ -376,19 +369,19 @@ export default function CropAdvisor() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 rounded-lg bg-muted/50">
                         <span className="text-sm text-muted-foreground">pH Level</span>
-                        <p className="text-xl font-bold text-foreground">{mockRecommendations.soilHealth.ph}</p>
+                        <p className="text-xl font-bold text-foreground">{(recommendations!).soilHealth.ph}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-muted/50">
                         <span className="text-sm text-muted-foreground">Nitrogen</span>
-                        <p className="text-xl font-bold text-foreground">{mockRecommendations.soilHealth.nitrogen}</p>
+                        <p className="text-xl font-bold text-foreground">{(recommendations!).soilHealth.nitrogen}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-muted/50">
                         <span className="text-sm text-muted-foreground">Phosphorus</span>
-                        <p className="text-xl font-bold text-harvest">{mockRecommendations.soilHealth.phosphorus}</p>
+                        <p className="text-xl font-bold text-harvest">{(recommendations!).soilHealth.phosphorus}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-muted/50">
                         <span className="text-sm text-muted-foreground">Potassium</span>
-                        <p className="text-xl font-bold text-leaf">{mockRecommendations.soilHealth.potassium}</p>
+                        <p className="text-xl font-bold text-leaf">{(recommendations!).soilHealth.potassium}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -404,7 +397,7 @@ export default function CropAdvisor() {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-3">
-                      {mockRecommendations.warnings.map((warning, index) => (
+                      {(recommendations!).warnings.map((warning, index) => (
                         <li key={index} className="flex items-start gap-3 p-3 rounded-lg bg-harvest/10">
                           <AlertTriangle className="w-4 h-4 text-harvest mt-0.5 flex-shrink-0" />
                           <span className="text-sm text-foreground">{warning}</span>
@@ -425,7 +418,7 @@ export default function CropAdvisor() {
                 </CardHeader>
                 <CardContent>
                   <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {mockRecommendations.tips.map((tip, index) => (
+                    {(recommendations!).tips.map((tip, index) => (
                       <li key={index} className="flex items-start gap-3 p-4 rounded-lg bg-leaf/5 border border-leaf/20">
                         <span className="w-6 h-6 rounded-full bg-leaf/20 flex items-center justify-center text-leaf font-bold text-sm flex-shrink-0">
                           {index + 1}

@@ -2,3 +2,9 @@ project_id = "lovable"
 
 [functions.esp32-ingest]
 verify_jwt = false
+
+[functions.detect-disease]
+verify_jwt = false
+
+[functions.crop-advisor]
+verify_jwt = false
