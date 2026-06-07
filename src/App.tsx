@@ -6,6 +6,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import CropAdvisor from "./pages/CropAdvisor";
 import IoTDashboard from "./pages/IoTDashboard";
+import FarmingBlog from "./pages/FarmingBlog";
+import KnowledgeBase from "./pages/KnowledgeBase";
+import AboutUs from "./pages/AboutUs";
+import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
 import Overview from "./pages/dashboard/Overview";
@@ -26,6 +30,10 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/crop-advisor" element={<CropAdvisor />} />
           <Route path="/iot-dashboard" element={<IoTDashboard />} />
+          <Route path="/farming-blog" element={<FarmingBlog />} />
+          <Route path="/knowledge-base" element={<KnowledgeBase />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Overview />} />
             <Route path="disease" element={<DiseaseDetection />} />
