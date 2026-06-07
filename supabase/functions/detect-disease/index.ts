@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const systemPrompt = `You are an expert plant pathologist CNN model. Analyze the leaf image and classify the disease. Respond with the tool call only.`;
+    const systemPrompt = `You are an expert botanist and plant pathologist acting as a CNN classifier. Identify the plant/leaf, describe it briefly, diagnose any disease, and give a clear treatment solution. Respond with the tool call only.`;
 
     const tools = [
       {
@@ -43,8 +43,17 @@ Deno.serve(async (req) => {
               isHealthy: { type: "boolean" },
               recommendation: { type: "string", description: "1-2 sentence treatment advice for the farmer" },
               plantType: { type: "string", description: "Best guess of plant species, or 'Unknown'" },
+              leafName: { type: "string", description: "Common name of the leaf/plant, e.g. 'Tomato leaf', 'Mango leaf'" },
+              scientificName: { type: "string", description: "Scientific (Latin) name of the plant, or 'Unknown'" },
+              plantInfo: { type: "string", description: "2-3 sentence overview of the plant: family, typical growing conditions, common uses" },
+              diseaseInfo: { type: "string", description: "2-3 sentence explanation of the disease, its cause (fungal/bacterial/viral/nutrient/pest) and symptoms. If healthy, describe the healthy indicators." },
+              causes: { type: "array", items: { type: "string" }, description: "Key causes or risk factors (3-5 short bullets)" },
+              symptoms: { type: "array", items: { type: "string" }, description: "Visible symptoms (3-5 short bullets)" },
+              solution: { type: "array", items: { type: "string" }, description: "Step-by-step treatment / action plan (3-6 short steps)" },
+              prevention: { type: "array", items: { type: "string" }, description: "Prevention tips (3-5 short bullets)" },
+              severity: { type: "string", description: "One of: None, Low, Moderate, High, Severe" },
             },
-            required: ["predictedClass", "confidence", "isHealthy", "recommendation", "plantType"],
+            required: ["predictedClass", "confidence", "isHealthy", "recommendation", "plantType", "leafName", "scientificName", "plantInfo", "diseaseInfo", "causes", "symptoms", "solution", "prevention", "severity"],
             additionalProperties: false,
           },
         },

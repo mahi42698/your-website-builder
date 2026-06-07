@@ -8,6 +8,15 @@ export type DiseasePrediction = {
   recommendation: string;
   modelVersion: string;
   plantType?: string;
+  leafName?: string;
+  scientificName?: string;
+  plantInfo?: string;
+  diseaseInfo?: string;
+  causes?: string[];
+  symptoms?: string[];
+  solution?: string[];
+  prevention?: string[];
+  severity?: string;
 };
 
 export async function predictDisease(imageDataUrl: string): Promise<DiseasePrediction> {
@@ -23,5 +32,14 @@ export async function predictDisease(imageDataUrl: string): Promise<DiseasePredi
     recommendation: data.recommendation,
     modelVersion: data.modelVersion ?? "gemini-vision",
     plantType: data.plantType,
+    leafName: data.leafName,
+    scientificName: data.scientificName,
+    plantInfo: data.plantInfo,
+    diseaseInfo: data.diseaseInfo,
+    causes: data.causes,
+    symptoms: data.symptoms,
+    solution: data.solution,
+    prevention: data.prevention,
+    severity: data.severity,
   };
 }
