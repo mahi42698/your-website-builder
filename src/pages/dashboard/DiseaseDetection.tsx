@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Brain, Camera, Upload, Loader2, Leaf, History as HistoryIcon } from "lucide-react";
+import { Brain, Camera, Upload, Loader2, Leaf, History as HistoryIcon, Sprout, AlertTriangle, Stethoscope, ShieldCheck, Info, ListChecks } from "lucide-react";
 import { predictDisease, type DiseasePrediction } from "@/lib/cnn";
 import { usePredictions } from "@/hooks/useDashboardData";
 import { toast } from "sonner";
@@ -112,7 +112,26 @@ export default function DiseaseDetection() {
                     {prediction.isHealthy ? "Healthy" : "Diseased"}
                   </Badge>
                   <Badge variant="outline">{prediction.modelVersion}</Badge>
+                  {prediction.severity && (
+                    <Badge variant="outline">Severity: {prediction.severity}</Badge>
+                  )}
                 </div>
+                {(prediction.leafName || prediction.plantType) && (
+                  <div className="p-3 rounded-lg bg-muted/40 border">
+                    <div className="flex items-center gap-2 text-sm font-semibold">
+                      <Sprout className="w-4 h-4 text-primary" /> Identified Leaf
+                    </div>
+                    <div className="mt-1 text-base font-bold">
+                      {prediction.leafName || prediction.plantType}
+                    </div>
+                    {prediction.scientificName && (
+                      <div className="text-xs italic text-muted-foreground">{prediction.scientificName}</div>
+                    )}
+                    {prediction.plantInfo && (
+                      <p className="text-sm text-muted-foreground mt-2">{prediction.plantInfo}</p>
+                    )}
+                  </div>
+                )}
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">Predicted disease</div>
                   <div className="text-2xl font-bold">{prediction.predictedClass}</div>
@@ -124,8 +143,56 @@ export default function DiseaseDetection() {
                   </div>
                   <Progress value={prediction.confidence * 100} className="h-2" />
                 </div>
+                {prediction.diseaseInfo && (
+                  <div className="p-3 rounded-lg bg-muted/40 border">
+                    <div className="flex items-center gap-2 text-sm font-semibold mb-1">
+                      <Info className="w-4 h-4 text-primary" /> About this condition
+                    </div>
+                    <p className="text-sm text-muted-foreground">{prediction.diseaseInfo}</p>
+                  </div>
+                )}
+                {prediction.symptoms && prediction.symptoms.length > 0 && (
+                  <div className="p-3 rounded-lg border">
+                    <div className="flex items-center gap-2 text-sm font-semibold mb-2">
+                      <Stethoscope className="w-4 h-4 text-primary" /> Symptoms
+                    </div>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                      {prediction.symptoms.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {prediction.causes && prediction.causes.length > 0 && (
+                  <div className="p-3 rounded-lg border">
+                    <div className="flex items-center gap-2 text-sm font-semibold mb-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-500" /> Likely Causes
+                    </div>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                      {prediction.causes.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {prediction.solution && prediction.solution.length > 0 && (
+                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                    <div className="flex items-center gap-2 text-sm font-semibold mb-2">
+                      <ListChecks className="w-4 h-4 text-primary" /> Solution / Treatment Plan
+                    </div>
+                    <ol className="list-decimal list-inside text-sm text-foreground space-y-1">
+                      {prediction.solution.map((s, i) => <li key={i}>{s}</li>)}
+                    </ol>
+                  </div>
+                )}
+                {prediction.prevention && prediction.prevention.length > 0 && (
+                  <div className="p-3 rounded-lg border">
+                    <div className="flex items-center gap-2 text-sm font-semibold mb-2">
+                      <ShieldCheck className="w-4 h-4 text-primary" /> Prevention
+                    </div>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                      {prediction.prevention.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                )}
                 <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                  <div className="text-sm font-semibold mb-1">Recommended Action</div>
+                  <div className="text-sm font-semibold mb-1">Quick Answer</div>
                   <p className="text-sm text-muted-foreground">{prediction.recommendation}</p>
                 </div>
               </div>
