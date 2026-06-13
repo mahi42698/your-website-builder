@@ -23,6 +23,53 @@ function mockCnnPredict() {
   return { ...pick, confidence: Number(confidence.toFixed(4)) };
 }
 
+async function geminiPredict(imageDataUrl: string) {
+  const key = Deno.env.get("LOVABLE_API_KEY");
+  if (!key) return null;
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: "You are a plant pathologist. Classify the leaf and call report_diagnosis." },
+          { role: "user", content: [
+            { type: "text", text: "Diagnose this leaf." },
+            { type: "image_url", image_url: { url: imageDataUrl } },
+          ]},
+        ],
+        tools: [{
+          type: "function",
+          function: {
+            name: "report_diagnosis",
+            parameters: {
+              type: "object",
+              properties: {
+                predictedClass: { type: "string" },
+                confidence: { type: "number" },
+                isHealthy: { type: "boolean" },
+                recommendation: { type: "string" },
+              },
+              required: ["predictedClass", "confidence", "isHealthy", "recommendation"],
+              additionalProperties: false,
+            },
+          },
+        }],
+        tool_choice: { type: "function", function: { name: "report_diagnosis" } },
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!args) return null;
+    const p = JSON.parse(args);
+    return { name: p.predictedClass, healthy: !!p.isHealthy, recommendation: p.recommendation, confidence: Number(p.confidence) };
+  } catch (_e) {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -73,7 +120,8 @@ Deno.serve(async (req) => {
 
     let prediction = null;
     if (image_base64) {
-      const bytes = Uint8Array.from(atob(image_base64), (c) => c.charCodeAt(0));
+      const cleanB64 = image_base64.includes(",") ? image_base64.split(",")[1] : image_base64;
+      const bytes = Uint8Array.from(atob(cleanB64), (c) => c.charCodeAt(0));
       const path = `${device_id}/${Date.now()}.jpg`;
       const { error: upErr } = await supabase.storage
         .from("leaf-images")
@@ -82,7 +130,8 @@ Deno.serve(async (req) => {
 
       const { data: urlData } = supabase.storage.from("leaf-images").getPublicUrl(path);
 
-      const result = mockCnnPredict();
+      const dataUrl = `data:image/jpeg;base64,${cleanB64}`;
+      const result = (await geminiPredict(dataUrl)) ?? mockCnnPredict();
       const { data: pred, error: predErr } = await supabase
         .from("disease_predictions")
         .insert({
@@ -93,6 +142,7 @@ Deno.serve(async (req) => {
           confidence: result.confidence,
           is_healthy: result.healthy,
           recommendation: result.recommendation,
+          model_version: "gemini-2.5-flash-vision",
         })
         .select()
         .single();
