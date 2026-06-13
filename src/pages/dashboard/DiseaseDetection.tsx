@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ export default function DiseaseDetection() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<DiseasePrediction | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [capturedAt, setCapturedAt] = useState<Date | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const { data: history } = usePredictions(8);
@@ -22,15 +23,17 @@ export default function DiseaseDetection() {
       const url = e.target?.result as string;
       setImageUrl(url);
       setPrediction(null);
+      setCapturedAt(new Date());
     };
     reader.readAsDataURL(file);
   };
 
-  const analyze = async () => {
-    if (!imageUrl) return;
+  const analyze = async (url?: string) => {
+    const target = url ?? imageUrl;
+    if (!target) return;
     setAnalyzing(true);
     try {
-      const result = await predictDisease(imageUrl);
+      const result = await predictDisease(target);
       setPrediction(result);
       toast.success(`CNN prediction: ${result.predictedClass}`);
     } catch {
@@ -39,6 +42,14 @@ export default function DiseaseDetection() {
       setAnalyzing(false);
     }
   };
+
+  // Auto-analyze whenever a new image is captured/uploaded
+  useEffect(() => {
+    if (imageUrl && !prediction && !analyzing) {
+      analyze(imageUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageUrl]);
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -89,9 +100,9 @@ export default function DiseaseDetection() {
               <Button onClick={() => fileRef.current?.click()} variant="outline" className="gap-2">
                 <Upload className="w-4 h-4" /> Upload
               </Button>
-              <Button onClick={analyze} disabled={!imageUrl || analyzing} className="col-span-2 gap-2">
+              <Button onClick={() => analyze()} disabled={!imageUrl || analyzing} className="col-span-2 gap-2">
                 {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
-                {analyzing ? "Analyzing leaf with CNN..." : "Detect Disease (Run CNN)"}
+                {analyzing ? "Analyzing leaf with CNN..." : "Re-run Detection"}
               </Button>
             </div>
           </CardContent>
@@ -116,6 +127,11 @@ export default function DiseaseDetection() {
                     <Badge variant="outline">Severity: {prediction.severity}</Badge>
                   )}
                 </div>
+                {capturedAt && (
+                  <div className="text-xs text-muted-foreground">
+                    Captured at {capturedAt.toLocaleTimeString()}
+                  </div>
+                )}
                 {(prediction.leafName || prediction.plantType) && (
                   <div className="p-3 rounded-lg bg-muted/40 border">
                     <div className="flex items-center gap-2 text-sm font-semibold">
