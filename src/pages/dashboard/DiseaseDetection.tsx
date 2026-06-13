@@ -100,9 +100,9 @@ export default function DiseaseDetection() {
               <Button onClick={() => fileRef.current?.click()} variant="outline" className="gap-2">
                 <Upload className="w-4 h-4" /> Upload
               </Button>
-              <Button onClick={analyze} disabled={!imageUrl || analyzing} className="col-span-2 gap-2">
+              <Button onClick={() => analyze()} disabled={!imageUrl || analyzing} className="col-span-2 gap-2">
                 {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
-                {analyzing ? "Analyzing leaf with CNN..." : "Detect Disease (Run CNN)"}
+                {analyzing ? "Analyzing leaf with CNN..." : "Re-run Detection"}
               </Button>
             </div>
           </CardContent>
