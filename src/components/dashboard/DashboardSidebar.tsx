@@ -1,4 +1,4 @@
-import { LayoutDashboard, Leaf, Activity, Cpu, History as HistoryIcon } from "lucide-react";
+import { LayoutDashboard, Leaf, Activity, Cpu, History as HistoryIcon, Wrench } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -18,6 +18,7 @@ const items = [
   { title: "Disease Detection", url: "/dashboard/disease", icon: Leaf },
   { title: "Sensor Monitoring", url: "/dashboard/sensors", icon: Activity },
   { title: "Devices", url: "/dashboard/devices", icon: Cpu },
+  { title: "ESP32-CAM Setup", url: "/dashboard/esp32-setup", icon: Wrench },
   { title: "History", url: "/dashboard/history", icon: HistoryIcon },
 ];
 
