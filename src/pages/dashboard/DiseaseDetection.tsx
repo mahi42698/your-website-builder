@@ -127,6 +127,11 @@ export default function DiseaseDetection() {
                     <Badge variant="outline">Severity: {prediction.severity}</Badge>
                   )}
                 </div>
+                {capturedAt && (
+                  <div className="text-xs text-muted-foreground">
+                    Captured at {capturedAt.toLocaleTimeString()}
+                  </div>
+                )}
                 {(prediction.leafName || prediction.plantType) && (
                   <div className="p-3 rounded-lg bg-muted/40 border">
                     <div className="flex items-center gap-2 text-sm font-semibold">
