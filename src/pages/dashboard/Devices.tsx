@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useDevices } from "@/hooks/useDashboardData";
-import { Camera, Cpu, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { useDevices, usePredictions } from "@/hooks/useDashboardData";
+import { Camera, Cpu, Upload, Wifi, WifiOff, ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 function timeAgo(iso: string | null) {
   if (!iso) return "never";
@@ -15,16 +16,38 @@ function timeAgo(iso: string | null) {
   return `${Math.floor(d / 86400)}d ago`;
 }
 
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const s = r.result as string;
+      resolve(s.includes(",") ? s.split(",")[1] : s);
+    };
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
 export default function Devices() {
   const { devices, loading } = useDevices();
+  const { data: predictions } = usePredictions(100);
   const [busy, setBusy] = useState<string | null>(null);
+  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const triggerCapture = async (id: string) => {
-    setBusy(id);
-    setTimeout(() => {
-      toast.success("Capture command queued for ESP32-CAM");
+  const uploadFor = async (device_id: string, file: File) => {
+    setBusy(device_id);
+    try {
+      const image_base64 = await fileToBase64(file);
+      const { data, error } = await supabase.functions.invoke("esp32-ingest", {
+        body: { device_id, image_base64 },
+      });
+      if (error || !data?.ok) throw new Error(data?.error ?? error?.message ?? "Upload failed");
+      toast.success(`Uploaded → ${data.prediction?.predicted_class ?? "saved"}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
       setBusy(null);
-    }, 800);
+    }
   };
 
   const placeholders = devices.length === 0 && !loading
@@ -32,10 +55,12 @@ export default function Devices() {
     : devices;
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 max-w-6xl">
       <div>
         <h2 className="font-display text-2xl font-bold">Device Management</h2>
-        <p className="text-sm text-muted-foreground">Manage your ESP32-CAM units, refresh status, trigger captures</p>
+        <p className="text-sm text-muted-foreground">
+          Manage ESP32-CAM units, upload leaf images, and browse every capture from each device.
+        </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -59,9 +84,9 @@ export default function Devices() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-3 gap-3 text-sm">
                 <div>
-                  <div className="text-muted-foreground text-xs">Camera</div>
+                  <div className="text-muted-foreground text-xs">Status</div>
                   <div className="font-medium flex items-center gap-1">
                     <Camera className="w-3 h-3" /> {d.is_online ? "Ready" : "Standby"}
                   </div>
@@ -70,25 +95,99 @@ export default function Devices() {
                   <div className="text-muted-foreground text-xs">Last sync</div>
                   <div className="font-medium">{timeAgo(d.last_seen)}</div>
                 </div>
+                <div>
+                  <div className="text-muted-foreground text-xs">Captures</div>
+                  <div className="font-medium">
+                    {predictions.filter((p) => p.device_id === d.device_id).length}
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1 gap-1">
-                  <RefreshCw className="w-3 h-3" /> Refresh
-                </Button>
-                <Button
-                  size="sm"
-                  className="flex-1 gap-1"
-                  disabled={!d.is_online || busy === d.id}
-                  onClick={() => triggerCapture(d.id)}
-                >
-                  <Camera className="w-3 h-3" />
-                  {busy === d.id ? "Sending..." : "Capture Leaf"}
-                </Button>
-              </div>
+              <input
+                ref={(el) => (fileRefs.current[d.device_id] = el)}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadFor(d.device_id, f);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                size="sm"
+                className="w-full gap-1"
+                disabled={busy === d.device_id}
+                onClick={() => fileRefs.current[d.device_id]?.click()}
+              >
+                {busy === d.device_id ? (
+                  <><Loader2 className="w-3 h-3 animate-spin" /> Uploading & detecting…</>
+                ) : (
+                  <><Upload className="w-3 h-3" /> Upload Leaf Image</>
+                )}
+              </Button>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ImageIcon className="w-4 h-4" /> All Captures
+              </CardTitle>
+              <CardDescription>Every image uploaded from any device, newest first.</CardDescription>
+            </div>
+            <Badge variant="outline">{predictions.length} total</Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {predictions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No captures yet. Upload an image from a device card above.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {predictions.map((p) => (
+                <a
+                  key={p.id}
+                  href={p.image_url ?? "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="border rounded-lg overflow-hidden hover:border-primary transition-colors group"
+                >
+                  {p.image_url ? (
+                    <img
+                      src={p.image_url}
+                      alt={p.predicted_class}
+                      className="w-full aspect-square object-cover group-hover:scale-[1.02] transition-transform"
+                    />
+                  ) : (
+                    <div className="w-full aspect-square bg-muted flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="p-2 space-y-1">
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${p.is_healthy ? "border-primary/30 text-primary" : "border-destructive/30 text-destructive"}`}
+                    >
+                      {p.predicted_class}
+                    </Badge>
+                    <div className="flex justify-between text-[11px] text-muted-foreground">
+                      <span>{(Number(p.confidence) * 100).toFixed(0)}%</span>
+                      <span>{new Date(p.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+                    <div className="text-[10px] font-mono text-muted-foreground truncate">{p.device_id}</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
