@@ -3,19 +3,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Brain, Camera, Upload, Loader2, Leaf, History as HistoryIcon, Sprout, AlertTriangle, Stethoscope, ShieldCheck, Info, ListChecks } from "lucide-react";
+import { Brain, Camera, Upload, Loader2, Leaf, History as HistoryIcon, Sprout, AlertTriangle, Stethoscope, ShieldCheck, Info, ListChecks, Radio } from "lucide-react";
 import { predictDisease, type DiseasePrediction } from "@/lib/cnn";
 import { usePredictions } from "@/hooks/useDashboardData";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 export default function DiseaseDetection() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<DiseasePrediction | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [capturedAt, setCapturedAt] = useState<Date | null>(null);
+  const [liveMode, setLiveMode] = useState(true);
+  const [lastSeenId, setLastSeenId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
-  const { data: history } = usePredictions(8);
+  const { data: history } = usePredictions(5);
 
   const handleFile = (file: File) => {
     const reader = new FileReader();
@@ -51,11 +54,52 @@ export default function DiseaseDetection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageUrl]);
 
+  // Live ESP32 mode: auto-display newest prediction from backend
+  useEffect(() => {
+    if (!history.length) return;
+    const latest = history[0];
+    if (lastSeenId === null) {
+      setLastSeenId(latest.id);
+      return;
+    }
+    if (latest.id !== lastSeenId && liveMode) {
+      loadFromHistory(latest);
+      toast.success(`New ESP32 capture: ${latest.predicted_class}`);
+    }
+    setLastSeenId(latest.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history, liveMode]);
+
+  const loadFromHistory = (p: typeof history[number]) => {
+    if (p.image_url) setImageUrl(p.image_url);
+    setCapturedAt(new Date(p.created_at));
+    setPrediction({
+      predictedClass: p.predicted_class,
+      confidence: Number(p.confidence),
+      isHealthy: p.is_healthy,
+      recommendation: p.recommendation ?? "",
+      modelVersion: p.model_version ?? "cnn",
+    });
+  };
+
   return (
     <div className="space-y-6 max-w-7xl">
       <div>
         <h2 className="font-display text-2xl font-bold">Leaf Disease Detection</h2>
         <p className="text-sm text-muted-foreground">Upload a leaf image or use ESP32-CAM. CNN model classifies disease and confidence.</p>
+      </div>
+
+      <div className="flex items-center justify-between p-3 rounded-lg border bg-card">
+        <div className="flex items-center gap-2">
+          <Radio className={`w-4 h-4 ${liveMode ? "text-primary animate-pulse" : "text-muted-foreground"}`} />
+          <div>
+            <div className="text-sm font-semibold">Live ESP32-CAM Mode</div>
+            <div className="text-xs text-muted-foreground">
+              {liveMode ? "Auto-displays the newest leaf capture and CNN result instantly." : "Live updates paused."}
+            </div>
+          </div>
+        </div>
+        <Switch checked={liveMode} onCheckedChange={setLiveMode} />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-4">
@@ -239,15 +283,22 @@ export default function DiseaseDetection() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {history.map((p) => (
-                <div key={p.id} className="border rounded-lg overflow-hidden">
+                <button
+                  key={p.id}
+                  onClick={() => loadFromHistory(p)}
+                  className="border rounded-lg overflow-hidden text-left hover:border-primary transition-colors"
+                >
                   {p.image_url && <img src={p.image_url} alt={p.predicted_class} className="w-full aspect-square object-cover" />}
                   <div className="p-2">
                     <Badge variant="outline" className={`text-xs ${p.is_healthy ? "border-primary/30 text-primary" : "border-destructive/30 text-destructive"}`}>
                       {p.predicted_class}
                     </Badge>
-                    <div className="text-xs text-muted-foreground mt-1">{(p.confidence * 100).toFixed(0)}%</div>
+                    <div className="text-xs text-muted-foreground mt-1 flex justify-between">
+                      <span>{(Number(p.confidence) * 100).toFixed(0)}%</span>
+                      <span>{new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
