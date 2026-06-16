@@ -1,29 +1,14 @@
 import { AlertTriangle, CloudOff, Bug, TrendingDown } from "lucide-react";
-
-const problems = [
-  {
-    icon: CloudOff,
-    title: "Unpredictable Weather",
-    description: "Climate change makes traditional farming knowledge unreliable, leading to crop failures and financial losses.",
-  },
-  {
-    icon: AlertTriangle,
-    title: "Improper Irrigation",
-    description: "Without real-time soil monitoring, farmers often over or under-water crops, wasting resources and reducing yields.",
-  },
-  {
-    icon: Bug,
-    title: "Crop Diseases",
-    description: "Late detection of plant diseases spreads infections rapidly, devastating entire harvests before treatment.",
-  },
-  {
-    icon: TrendingDown,
-    title: "Unfair Market Prices",
-    description: "Lack of market information leaves farmers vulnerable to middlemen, receiving below-fair prices for produce.",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const ProblemSection = () => {
+  const { t } = useLanguage();
+  const problems = [
+    { icon: CloudOff, title: t("problem.p1.t"), description: t("problem.p1.d") },
+    { icon: AlertTriangle, title: t("problem.p2.t"), description: t("problem.p2.d") },
+    { icon: Bug, title: t("problem.p3.t"), description: t("problem.p3.d") },
+    { icon: TrendingDown, title: t("problem.p4.t"), description: t("problem.p4.d") },
+  ];
   return (
     <section id="problem" className="py-20 md:py-32 bg-gradient-earth relative overflow-hidden">
       {/* Decorative Pattern */}
@@ -36,15 +21,12 @@ export const ProblemSection = () => {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block text-sm font-semibold text-secondary uppercase tracking-wider mb-4">
-            The Challenge
+            {t("problem.kicker")}
           </span>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            What Bangladeshi Farmers Face Every Day
+            {t("problem.title")}
           </h2>
-          <p className="text-lg text-muted-foreground">
-            Small-scale farmers struggle with outdated practices and limited access to technology, 
-            creating a gap that AgroAI aims to bridge.
-          </p>
+          <p className="text-lg text-muted-foreground">{t("problem.desc")}</p>
         </div>
 
         {/* Problem Cards */}
@@ -72,13 +54,9 @@ export const ProblemSection = () => {
         <div className="mt-16 text-center">
           <div className="inline-block bg-card border border-border rounded-2xl p-8 shadow-soft max-w-2xl">
             <p className="text-lg md:text-xl text-foreground font-medium leading-relaxed">
-              "Current systems are either{" "}
-              <span className="text-destructive font-semibold">too expensive</span> or{" "}
-              <span className="text-destructive font-semibold">not designed</span> for the needs of small-scale farmers."
+              "{t("problem.quote")}"
             </p>
-            <p className="text-muted-foreground mt-4">
-              — Problem Statement, AgroAI Research
-            </p>
+            <p className="text-muted-foreground mt-4">{t("problem.quoteSrc")}</p>
           </div>
         </div>
       </div>

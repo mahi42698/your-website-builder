@@ -2,55 +2,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { 
-  Cpu, 
-  Camera, 
-  Droplets, 
-  Wifi, 
-  ArrowRight,
-  Zap,
-  Shield,
-  BarChart3
+import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Cpu, Camera, Droplets, Wifi, ArrowRight, Zap, Shield, BarChart3, Activity,
 } from "lucide-react";
 
-const hardwareFeatures = [
-  {
-    icon: Cpu,
-    title: "ESP32 Microcontroller",
-    description: "Dual-core processor with built-in WiFi and Bluetooth for seamless connectivity",
-    color: "text-blue-500",
-    bg: "bg-blue-500/10"
-  },
-  {
-    icon: Camera,
-    title: "HD Camera Module",
-    description: "High-resolution camera for crop monitoring and disease detection",
-    color: "text-purple-500",
-    bg: "bg-purple-500/10"
-  },
-  {
-    icon: Droplets,
-    title: "Soil Moisture Sensor",
-    description: "Accurate real-time soil moisture measurement for optimal irrigation",
-    color: "text-cyan-500",
-    bg: "bg-cyan-500/10"
-  },
-  {
-    icon: Wifi,
-    title: "Wireless Connectivity",
-    description: "WiFi-enabled data transmission to cloud dashboard from anywhere",
-    color: "text-green-500",
-    bg: "bg-green-500/10"
-  }
-];
-
-const capabilities = [
-  { icon: Zap, text: "Real-time monitoring" },
-  { icon: Shield, text: "Secure data transmission" },
-  { icon: BarChart3, text: "Historical analytics" }
-];
-
 export const HardwareSection = () => {
+  const { t } = useLanguage();
+  const hardwareFeatures = [
+    { icon: Cpu, title: t("hw.h1.t"), description: t("hw.h1.d"), color: "text-blue-500", bg: "bg-blue-500/10" },
+    { icon: Camera, title: t("hw.h2.t"), description: t("hw.h2.d"), color: "text-purple-500", bg: "bg-purple-500/10" },
+    { icon: Droplets, title: t("hw.h3.t"), description: t("hw.h3.d"), color: "text-cyan-500", bg: "bg-cyan-500/10" },
+    { icon: Wifi, title: t("hw.h4.t"), description: t("hw.h4.d"), color: "text-green-500", bg: "bg-green-500/10" },
+  ];
+  const capabilities = [
+    { icon: Zap, text: t("hw.cap1") },
+    { icon: Shield, text: t("hw.cap2") },
+    { icon: BarChart3, text: t("hw.cap3") },
+  ];
   return (
     <section id="hardware" className="py-20 bg-gradient-to-br from-muted/50 via-background to-primary/5">
       <div className="container mx-auto px-4">
@@ -58,14 +27,13 @@ export const HardwareSection = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
             <Cpu className="w-3 h-3 mr-1" />
-            IoT Hardware
+            {t("hw.badge")}
           </Badge>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Smart Hardware Integration
+            {t("hw.title")}
           </h2>
           <p className="text-lg text-muted-foreground">
-            Our IoT solution combines ESP32 microcontroller with advanced sensors 
-            for comprehensive farm monitoring and intelligent recommendations
+            {t("hw.desc")}
           </p>
         </div>
 
@@ -92,12 +60,8 @@ export const HardwareSection = () => {
           <CardContent className="p-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
               <div>
-                <h3 className="text-2xl font-bold mb-4">Complete IoT Ecosystem</h3>
-                <p className="text-muted-foreground mb-6">
-                  Our hardware solution provides end-to-end monitoring capabilities, 
-                  from soil conditions to visual crop analysis. All data is transmitted 
-                  securely to our cloud platform for AI-powered insights.
-                </p>
+                <h3 className="text-2xl font-bold mb-4">{t("hw.ecoTitle")}</h3>
+                <p className="text-muted-foreground mb-6">{t("hw.ecoDesc")}</p>
                 <div className="flex flex-wrap gap-4 mb-6">
                   {capabilities.map((cap, index) => (
                     <div key={index} className="flex items-center gap-2 text-sm">
@@ -106,9 +70,10 @@ export const HardwareSection = () => {
                     </div>
                   ))}
                 </div>
-                <Link to="/iot-dashboard">
-                  <Button className="group">
-                    View Live Dashboard
+                <Link to="/dashboard">
+                  <Button variant="hero" size="lg" className="group">
+                    <Activity className="w-4 h-4 mr-2 animate-pulse" />
+                    {t("hw.cta")}
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
@@ -127,12 +92,8 @@ export const HardwareSection = () => {
                         <Droplets className="w-8 h-8 text-cyan-500" />
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      ESP32 + Camera + Soil Sensor
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Hardware diagram placeholder
-                    </p>
+                    <p className="text-sm text-muted-foreground">{t("hw.diagram")}</p>
+                    <p className="text-xs text-muted-foreground mt-2">{t("hw.diagramSub")}</p>
                   </div>
                 </div>
               </div>

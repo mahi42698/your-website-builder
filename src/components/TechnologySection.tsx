@@ -1,4 +1,5 @@
-import { Smartphone, Server, Database, Brain, Cpu, Cloud, Globe } from "lucide-react";
+import { Smartphone, Server, Database, Brain, Cpu, Cloud } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const technologies = [
   { category: "Frontend", items: ["React Native (Mobile)", "React.js (Web)"], icon: Smartphone },
@@ -9,14 +10,14 @@ const technologies = [
   { category: "APIs", items: ["OpenWeather", "Govt. Market API"], icon: Cloud },
 ];
 
-const architectureLayers = [
-  { name: "User Interface", description: "Mobile & Web Applications", color: "bg-primary" },
-  { name: "AI Processing", description: "ML Models & Predictions", color: "bg-accent" },
-  { name: "IoT Data Layer", description: "Sensor Data Collection", color: "bg-sky" },
-  { name: "Cloud Services", description: "Backend & Storage", color: "bg-secondary" },
-];
-
 export const TechnologySection = () => {
+  const { t } = useLanguage();
+  const architectureLayers = [
+    { name: t("tech.layer1"), description: t("tech.layer1d"), color: "bg-primary" },
+    { name: t("tech.layer2"), description: t("tech.layer2d"), color: "bg-accent" },
+    { name: t("tech.layer3"), description: t("tech.layer3d"), color: "bg-sky" },
+    { name: t("tech.layer4"), description: t("tech.layer4d"), color: "bg-secondary" },
+  ];
   return (
     <section id="technology" className="py-20 md:py-32 bg-gradient-earth relative overflow-hidden">
       {/* Background Pattern */}
@@ -30,15 +31,12 @@ export const TechnologySection = () => {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-4">
-            Technology Stack
+            {t("tech.kicker")}
           </span>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Built with Modern Technologies
+            {t("tech.title")}
           </h2>
-          <p className="text-lg text-muted-foreground">
-            A robust technology stack ensuring scalability, reliability, and optimal performance 
-            for farmers across Bangladesh.
-          </p>
+          <p className="text-lg text-muted-foreground">{t("tech.desc")}</p>
         </div>
 
         {/* Technology Cards */}
@@ -73,7 +71,7 @@ export const TechnologySection = () => {
         {/* Architecture Diagram */}
         <div className="bg-card rounded-3xl p-8 md:p-12 border border-border shadow-soft">
           <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">
-            System Architecture
+            {t("tech.arch")}
           </h3>
           <div className="max-w-3xl mx-auto">
             <div className="flex flex-col gap-4">

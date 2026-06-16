@@ -17,16 +17,17 @@ import DiseaseDetection from "./pages/dashboard/DiseaseDetection";
 import Sensors from "./pages/dashboard/Sensors";
 import Devices from "./pages/dashboard/Devices";
 import History from "./pages/dashboard/History";
-import ESP32Setup from "./pages/dashboard/ESP32Setup";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/crop-advisor" element={<CropAdvisor />} />
@@ -40,14 +41,14 @@ const App = () => (
             <Route path="disease" element={<DiseaseDetection />} />
             <Route path="sensors" element={<Sensors />} />
             <Route path="devices" element={<Devices />} />
-            <Route path="esp32-setup" element={<ESP32Setup />} />
             <Route path="history" element={<History />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 
