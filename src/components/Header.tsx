@@ -2,71 +2,24 @@ import { Leaf, Menu, X, Globe } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-type Lang = "en" | "bn";
-
-const navLabels = {
-  en: {
-    home: "Home",
-    cropAdvisor: "Crop Advisor",
-    smartMonitoring: "Smart Monitoring",
-    farmingBlog: "Farming Blog",
-    knowledgeBase: "Knowledge Base",
-    aboutUs: "About Us",
-    contactUs: "Contact Us",
-  },
-  bn: {
-    home: "হোম",
-    cropAdvisor: "ফসল পরামর্শ",
-    smartMonitoring: "স্মার্ট মনিটরিং",
-    farmingBlog: "কৃষি ব্লগ",
-    knowledgeBase: "জ্ঞানভান্ডার",
-    aboutUs: "আমাদের সম্পর্কে",
-    contactUs: "যোগাযোগ",
-  },
-} as const;
-
-type NavKey = keyof typeof navLabels.en;
-
-const navItems: { key: NavKey; path: string }[] = [
-  { key: "home", path: "/" },
-  { key: "cropAdvisor", path: "/crop-advisor" },
-  { key: "smartMonitoring", path: "/iot-dashboard" },
-  { key: "farmingBlog", path: "/farming-blog" },
-  { key: "knowledgeBase", path: "/knowledge-base" },
-  { key: "aboutUs", path: "/about-us" },
-  { key: "contactUs", path: "/contact-us" },
+const navItems = [
+  { key: "nav.home", path: "/" },
+  { key: "nav.cropAdvisor", path: "/crop-advisor" },
+  { key: "nav.smartMonitoring", path: "/iot-dashboard" },
+  { key: "nav.farmingBlog", path: "/farming-blog" },
+  { key: "nav.knowledgeBase", path: "/knowledge-base" },
+  { key: "nav.aboutUs", path: "/about-us" },
+  { key: "nav.contactUs", path: "/contact-us" },
 ];
-
-const metaLabels = {
-  en: {
-    tagline: "Smart Farming Assistant",
-    cta: "Get Started",
-    switchLang: "বাংলা",
-    openMenu: "Open menu",
-    closeMenu: "Close menu",
-    switchTo: "Switch to Bangla",
-  },
-  bn: {
-    tagline: "স্মার্ট কৃষি সহকারী",
-    cta: "শুরু করুন",
-    switchLang: "English",
-    openMenu: "মেনু খুলুন",
-    closeMenu: "মেনু বন্ধ করুন",
-    switchTo: "Switch to English",
-  },
-} as const;
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [lang, setLang] = useState<Lang>("en");
+  const { t, toggleLang } = useLanguage();
   const { pathname } = useLocation();
 
-  const labels = navLabels[lang];
-  const meta = metaLabels[lang];
   const isActive = (path: string) => pathname === path;
-
-  const toggleLang = () => setLang((prev) => (prev === "en" ? "bn" : "en"));
   const toggleMenu = () => setIsOpen((prev) => !prev);
   const closeMenu = () => setIsOpen(false);
 
@@ -85,7 +38,7 @@ export function Header() {
                 Agro<span className="text-primary">AI</span>
               </span>
               <span className="text-[11px] font-medium text-muted-foreground leading-tight hidden sm:block">
-                {meta.tagline}
+                {t("meta.tagline")}
               </span>
             </div>
           </Link>
@@ -105,7 +58,7 @@ export function Header() {
                   )}
                   aria-current={active ? "page" : undefined}
                 >
-                  {labels[item.key]}
+                  {t(item.key)}
                   <span
                     className={cn(
                       "absolute bottom-0.5 left-1/2 h-0.5 rounded-full bg-primary transition-all duration-300 -translate-x-1/2",
@@ -122,16 +75,16 @@ export function Header() {
             <button
               onClick={toggleLang}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200"
-              aria-label={meta.switchTo}
+              aria-label={t("meta.switchTo")}
             >
               <Globe className="w-4 h-4" aria-hidden="true" />
-              {meta.switchLang}
+              {t("meta.switchLang")}
             </button>
             <Link
               to="/crop-advisor"
               className="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-xl text-primary-foreground bg-gradient-accent shadow-soft hover:shadow-medium transition-all duration-300 hover:scale-105 active:scale-95"
             >
-              {meta.cta}
+              {t("meta.cta")}
             </Link>
           </div>
 
@@ -139,7 +92,7 @@ export function Header() {
           <button
             onClick={toggleMenu}
             className="lg:hidden p-2 rounded-lg text-foreground hover:bg-primary/5 transition-colors"
-            aria-label={isOpen ? meta.closeMenu : meta.openMenu}
+            aria-label={isOpen ? t("meta.closeMenu") : t("meta.openMenu")}
             aria-expanded={isOpen}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -165,7 +118,7 @@ export function Header() {
                     )}
                     aria-current={active ? "page" : undefined}
                   >
-                    {labels[item.key]}
+                    {t(item.key)}
                   </Link>
                 );
               })}
@@ -174,17 +127,17 @@ export function Header() {
               <button
                 onClick={toggleLang}
                 className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl border border-primary/10 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200"
-                aria-label={meta.switchTo}
+                aria-label={t("meta.switchTo")}
               >
                 <Globe className="w-4 h-4" aria-hidden="true" />
-                {meta.switchLang}
+                {t("meta.switchLang")}
               </button>
               <Link
                 to="/crop-advisor"
                 onClick={closeMenu}
                 className="inline-flex items-center justify-center px-5 py-3 text-base font-semibold rounded-xl text-primary-foreground bg-gradient-accent shadow-soft hover:shadow-medium transition-all duration-300"
               >
-                {meta.cta}
+                {t("meta.cta")}
               </Link>
             </div>
           </div>

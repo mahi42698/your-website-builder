@@ -1,37 +1,5 @@
 import { Wheat, Droplet, Scan, Bell, WifiOff } from "lucide-react";
-
-const features = [
-  {
-    icon: Wheat,
-    title: "AI Crop Recommendation",
-    description: "Get personalized crop suggestions based on soil quality, season, and regional data using Decision Trees and Random Forest algorithms.",
-    color: "primary" as const,
-  },
-  {
-    icon: Droplet,
-    title: "Smart Irrigation Monitoring",
-    description: "ESP32-powered IoT sensors track real-time soil moisture and temperature, alerting you when crops need water.",
-    color: "sky" as const,
-  },
-  {
-    icon: Scan,
-    title: "Plant Disease Detection",
-    description: "Computer Vision models using CNN technology identify diseases early from plant photos, enabling quick treatment.",
-    color: "accent" as const,
-  },
-  {
-    icon: Bell,
-    title: "Real-Time Alerts in Bangla",
-    description: "Receive weather forecasts and market price updates directly in Bangla, helping you make informed decisions.",
-    color: "secondary" as const,
-  },
-  {
-    icon: WifiOff,
-    title: "Offline Support",
-    description: "Essential features work without internet connectivity, ensuring rural farmers always have access to critical tools.",
-    color: "earth" as const,
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const colorClasses = {
   primary: {
@@ -62,21 +30,27 @@ const colorClasses = {
 };
 
 export const FeaturesSection = () => {
+  const { t } = useLanguage();
+  const features = [
+    { icon: Wheat, title: t("features.f1.t"), description: t("features.f1.d"), color: "primary" as const },
+    { icon: Droplet, title: t("features.f2.t"), description: t("features.f2.d"), color: "sky" as const },
+    { icon: Scan, title: t("features.f3.t"), description: t("features.f3.d"), color: "accent" as const },
+    { icon: Bell, title: t("features.f4.t"), description: t("features.f4.d"), color: "secondary" as const },
+    { icon: WifiOff, title: t("features.f5.t"), description: t("features.f5.d"), color: "earth" as const },
+  ];
+  const objectives = [t("features.obj1"), t("features.obj2"), t("features.obj3"), t("features.obj4"), t("features.obj5")];
   return (
     <section id="features" className="py-20 md:py-32 bg-background relative">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-4">
-            Our Solution
+            {t("features.kicker")}
           </span>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Intelligent Features for Smart Farming
+            {t("features.title")}
           </h2>
-          <p className="text-lg text-muted-foreground">
-            AgroAI combines cutting-edge AI, IoT, and Computer Vision to deliver 
-            a comprehensive farming assistant right in your pocket.
-          </p>
+          <p className="text-lg text-muted-foreground">{t("features.desc")}</p>
         </div>
 
         {/* Features Grid */}
@@ -105,16 +79,10 @@ export const FeaturesSection = () => {
         {/* Objectives Summary */}
         <div className="mt-20 bg-gradient-card rounded-3xl p-8 md:p-12 border border-border">
           <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">
-            Project Objectives
+            {t("features.objectives")}
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              "Develop AI model for crop recommendation",
-              "Implement IoT-based irrigation monitoring",
-              "Build computer vision disease detection",
-              "Provide real-time Bangla alerts",
-              "Ensure offline usability for rural areas",
-            ].map((objective, idx) => (
+            {objectives.map((objective, idx) => (
               <div key={idx} className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs font-bold text-primary-foreground">{idx + 1}</span>
