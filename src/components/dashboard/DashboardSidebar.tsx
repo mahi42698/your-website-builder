@@ -1,5 +1,6 @@
-import { LayoutDashboard, Leaf, Activity, Cpu, History as HistoryIcon, Wrench } from "lucide-react";
+import { LayoutDashboard, Leaf, Activity, Cpu, History as HistoryIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Sidebar,
   SidebarContent,
@@ -14,18 +15,18 @@ import {
 } from "@/components/ui/sidebar";
 
 const items = [
-  { title: "Overview", url: "/dashboard", icon: LayoutDashboard, end: true },
-  { title: "Disease Detection", url: "/dashboard/disease", icon: Leaf },
-  { title: "Sensor Monitoring", url: "/dashboard/sensors", icon: Activity },
-  { title: "Devices", url: "/dashboard/devices", icon: Cpu },
-  { title: "ESP32-CAM Setup", url: "/dashboard/esp32-setup", icon: Wrench },
-  { title: "History", url: "/dashboard/history", icon: HistoryIcon },
+  { title: "Overview", titleBn: "ওভারভিউ", url: "/dashboard", icon: LayoutDashboard, end: true },
+  { title: "Disease Detection", titleBn: "রোগ শনাক্তকরণ", url: "/dashboard/disease", icon: Leaf },
+  { title: "Sensor Monitoring", titleBn: "সেন্সর মনিটরিং", url: "/dashboard/sensors", icon: Activity },
+  { title: "Devices", titleBn: "ডিভাইস", url: "/dashboard/devices", icon: Cpu },
+  { title: "History", titleBn: "ইতিহাস", url: "/dashboard/history", icon: HistoryIcon },
 ];
 
 export function DashboardSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { lang } = useLanguage();
 
   const isActive = (url: string, end?: boolean) =>
     end ? location.pathname === url : location.pathname.startsWith(url);
@@ -46,7 +47,7 @@ export function DashboardSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
+          <SidebarGroupLabel>{lang === "bn" ? "ড্যাশবোর্ড" : "Dashboard"}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
@@ -56,7 +57,7 @@ export function DashboardSidebar() {
                     <SidebarMenuButton asChild isActive={active}>
                       <NavLink to={item.url} end={item.end}>
                         <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span>{lang === "bn" ? item.titleBn : item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
