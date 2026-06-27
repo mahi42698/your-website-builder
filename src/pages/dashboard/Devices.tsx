@@ -2,10 +2,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDevices, usePredictions } from "@/hooks/useDashboardData";
-import { Camera, Cpu, Upload, Wifi, WifiOff, ImageIcon, Loader2 } from "lucide-react";
+import { Camera, Cpu, Upload, Wifi, WifiOff, ImageIcon, Loader2, Trash2, BellRing } from "lucide-react";
 import { toast } from "sonner";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+const HIDDEN_KEY = "devices.hiddenPredictionIds";
+
+function loadHidden(): Set<string> {
+  try {
+    const raw = localStorage.getItem(HIDDEN_KEY);
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveHidden(s: Set<string>) {
+  localStorage.setItem(HIDDEN_KEY, JSON.stringify(Array.from(s)));
+}
 
 function timeAgo(iso: string | null) {
   if (!iso) return "never";
@@ -33,6 +59,54 @@ export default function Devices() {
   const { data: predictions } = usePredictions(100);
   const [busy, setBusy] = useState<string | null>(null);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [hidden, setHidden] = useState<Set<string>>(() => loadHidden());
+  const [notice, setNotice] = useState<{ device_id: string; predicted_class: string; confidence: number; image_url: string | null } | null>(null);
+  const lastSeenId = useRef<string | null>(null);
+
+  const visiblePredictions = predictions.filter((p) => !hidden.has(p.id));
+
+  // Watch for new predictions → toast + banner
+  useEffect(() => {
+    if (predictions.length === 0) return;
+    const newest = predictions[0];
+    if (lastSeenId.current === null) {
+      lastSeenId.current = newest.id;
+      return;
+    }
+    if (newest.id !== lastSeenId.current) {
+      lastSeenId.current = newest.id;
+      if (!hidden.has(newest.id)) {
+        toast.success(
+          `New capture from ${newest.device_id ?? "device"} → ${newest.predicted_class} (${(Number(newest.confidence) * 100).toFixed(0)}%)`,
+        );
+        setNotice({
+          device_id: newest.device_id ?? "unknown",
+          predicted_class: newest.predicted_class,
+          confidence: Number(newest.confidence),
+          image_url: newest.image_url,
+        });
+        const t = setTimeout(() => setNotice(null), 5000);
+        return () => clearTimeout(t);
+      }
+    }
+  }, [predictions, hidden]);
+
+  const clearDevice = (device_id: string) => {
+    const next = new Set(hidden);
+    predictions.filter((p) => p.device_id === device_id).forEach((p) => next.add(p.id));
+    saveHidden(next);
+    setHidden(next);
+    toast.success(`Cleared history for ${device_id}`);
+  };
+
+  const clearAll = () => {
+    const next = new Set(hidden);
+    predictions.forEach((p) => next.add(p.id));
+    saveHidden(next);
+    setHidden(next);
+    setNotice(null);
+    toast.success("Cleared all captures");
+  };
 
   const uploadFor = async (device_id: string, file: File) => {
     setBusy(device_id);
@@ -42,7 +116,19 @@ export default function Devices() {
         body: { device_id, image_base64 },
       });
       if (error || !data?.ok) throw new Error(data?.error ?? error?.message ?? "Upload failed");
-      toast.success(`Uploaded → ${data.prediction?.predicted_class ?? "saved"}`);
+      const p = data.prediction;
+      if (p) {
+        setNotice({
+          device_id,
+          predicted_class: p.predicted_class,
+          confidence: Number(p.confidence),
+          image_url: p.image_url,
+        });
+        toast.success(`Captured → ${p.predicted_class} (${(Number(p.confidence) * 100).toFixed(0)}%)`);
+        setTimeout(() => setNotice(null), 5000);
+      } else {
+        toast.success("Uploaded");
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally {
@@ -59,9 +145,33 @@ export default function Devices() {
       <div>
         <h2 className="font-display text-2xl font-bold">Device Management</h2>
         <p className="text-sm text-muted-foreground">
-          Manage ESP32-CAM units, upload leaf images, and browse every capture from each device.
+          Manage ESP32-CAM units, upload leaf images, get instant capture notices, and clean history any time.
         </p>
       </div>
+
+      {notice && (
+        <Card className="border-primary/40 bg-primary/5 animate-in fade-in slide-in-from-top-2">
+          <CardContent className="flex items-center gap-3 py-3">
+            {notice.image_url ? (
+              <img src={notice.image_url} alt="" className="w-12 h-12 rounded object-cover border" />
+            ) : (
+              <div className="w-12 h-12 rounded bg-muted flex items-center justify-center">
+                <ImageIcon className="w-5 h-5 text-muted-foreground" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold flex items-center gap-2">
+                <BellRing className="w-4 h-4 text-primary animate-pulse" />
+                New capture from <span className="font-mono">{notice.device_id}</span>
+              </div>
+              <div className="text-xs text-muted-foreground truncate">
+                {notice.predicted_class} • {(notice.confidence * 100).toFixed(0)}% confidence
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setNotice(null)}>Dismiss</Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid md:grid-cols-2 gap-4">
         {placeholders.map((d) => (
@@ -98,10 +208,54 @@ export default function Devices() {
                 <div>
                   <div className="text-muted-foreground text-xs">Captures</div>
                   <div className="font-medium">
-                    {predictions.filter((p) => p.device_id === d.device_id).length}
+                    {visiblePredictions.filter((p) => p.device_id === d.device_id).length}
                   </div>
                 </div>
               </div>
+              {(() => {
+                const latest = visiblePredictions.find((p) => p.device_id === d.device_id);
+                if (!latest) return (
+                  <div className="border rounded-lg p-6 text-center text-xs text-muted-foreground">
+                    No captures yet. Upload an image to see it appear here instantly.
+                  </div>
+                );
+                return (
+                  <div className="border rounded-lg overflow-hidden">
+                    {latest.image_url && (
+                      <img src={latest.image_url} alt={latest.predicted_class} className="w-full h-44 object-cover" />
+                    )}
+                    <div className="p-2 flex items-center justify-between text-xs">
+                      <Badge
+                        variant="outline"
+                        className={latest.is_healthy ? "border-primary/30 text-primary" : "border-destructive/30 text-destructive"}
+                      >
+                        {latest.predicted_class}
+                      </Badge>
+                      <span className="text-muted-foreground">
+                        {(Number(latest.confidence) * 100).toFixed(0)}% • {timeAgo(latest.created_at)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+              {(() => {
+                const list = visiblePredictions.filter((p) => p.device_id === d.device_id).slice(0, 12);
+                if (list.length === 0) return null;
+                return (
+                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                    {list.map((p) => (
+                      <a key={p.id} href={p.image_url ?? "#"} target="_blank" rel="noreferrer"
+                         className="shrink-0 w-14 h-14 rounded border overflow-hidden hover:border-primary">
+                        {p.image_url ? (
+                          <img src={p.image_url} alt={p.predicted_class} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-muted" />
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                );
+              })()}
               <input
                 ref={(el) => (fileRefs.current[d.device_id] = el)}
                 type="file"
@@ -114,18 +268,44 @@ export default function Devices() {
                   e.target.value = "";
                 }}
               />
-              <Button
-                size="sm"
-                className="w-full gap-1"
-                disabled={busy === d.device_id}
-                onClick={() => fileRefs.current[d.device_id]?.click()}
-              >
-                {busy === d.device_id ? (
-                  <><Loader2 className="w-3 h-3 animate-spin" /> Uploading & detecting…</>
-                ) : (
-                  <><Upload className="w-3 h-3" /> Upload Leaf Image</>
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1 gap-1"
+                  disabled={busy === d.device_id}
+                  onClick={() => fileRefs.current[d.device_id]?.click()}
+                >
+                  {busy === d.device_id ? (
+                    <><Loader2 className="w-3 h-3 animate-spin" /> Uploading & detecting…</>
+                  ) : (
+                    <><Upload className="w-3 h-3" /> Capture / Upload</>
+                  )}
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      disabled={visiblePredictions.filter((p) => p.device_id === d.device_id).length === 0}
+                    >
+                      <Trash2 className="w-3 h-3" /> Clean
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Clear history for {d.device_id}?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This hides all captures from this device on the dashboard. Existing records stay safe in the database.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => clearDevice(d.device_id)}>Clear</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -140,17 +320,38 @@ export default function Devices() {
               </CardTitle>
               <CardDescription>Every image uploaded from any device, newest first.</CardDescription>
             </div>
-            <Badge variant="outline">{predictions.length} total</Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">{visiblePredictions.length} shown</Badge>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="sm" variant="outline" className="gap-1" disabled={visiblePredictions.length === 0}>
+                    <Trash2 className="w-3 h-3" /> Clear all
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear all captures?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Hides every capture from the dashboard view. Records remain stored in the database.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={clearAll}>Clear all</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          {predictions.length === 0 ? (
+          {visiblePredictions.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               No captures yet. Upload an image from a device card above.
             </p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {predictions.map((p) => (
+              {visiblePredictions.map((p) => (
                 <a
                   key={p.id}
                   href={p.image_url ?? "#"}
