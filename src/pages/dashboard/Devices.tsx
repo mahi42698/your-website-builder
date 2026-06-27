@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDevices, usePredictions } from "@/hooks/useDashboardData";
-import { Camera, Cpu, Upload, Wifi, WifiOff, ImageIcon, Loader2, Trash2, BellRing } from "lucide-react";
+import { Camera, Cpu, Upload, Wifi, WifiOff, ImageIcon, Loader2, Trash2, BellRing, Copy, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -392,18 +392,186 @@ export default function Devices() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">ESP32-CAM Endpoint</CardTitle>
-          <CardDescription>Configure your ESP32-CAM firmware to POST sensor + image data here</CardDescription>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Camera className="w-4 h-4" /> ESP32-CAM Firmware (Optimized for Leaf Capture)
+          </CardTitle>
+          <CardDescription>
+            Tuned settings + warm-up frames so every photo is sharp, well-lit, and detectable by the AI.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs space-y-1">
+            <div className="font-semibold flex items-center gap-1"><Lightbulb className="w-3.5 h-3.5 text-primary" /> Capture tips</div>
+            <ul className="list-disc pl-5 text-muted-foreground space-y-0.5">
+              <li>Hold camera 15–25 cm from the leaf, fill the frame with green.</li>
+              <li>Use bright, diffuse daylight — avoid direct sun and harsh shadows.</li>
+              <li>Keep the leaf still for 1 second; ESP32-CAM has no stabilization.</li>
+              <li>Clean the lens (a fingerprint is the #1 cause of blurry shots).</li>
+              <li>Power the board with a stable 5V/2A supply — brownouts cause dark frames.</li>
+            </ul>
+          </div>
+
           <div className="font-mono text-xs bg-muted p-3 rounded-lg break-all">
             POST {import.meta.env.VITE_SUPABASE_URL}/functions/v1/esp32-ingest
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Body: <code>{`{ device_id, soil_moisture, temperature, humidity, light_intensity, image_base64 }`}</code>
+
+          <div className="relative">
+            <Button
+              size="sm"
+              variant="outline"
+              className="absolute top-2 right-2 gap-1 z-10"
+              onClick={() => {
+                navigator.clipboard.writeText(ESP32_SKETCH);
+                toast.success("Firmware copied to clipboard");
+              }}
+            >
+              <Copy className="w-3 h-3" /> Copy
+            </Button>
+            <pre className="bg-muted text-[11px] leading-relaxed p-4 pt-12 rounded-lg overflow-auto max-h-96">
+              <code>{ESP32_SKETCH}</code>
+            </pre>
+          </div>
+
+          <p className="text-[11px] text-muted-foreground">
+            Board: <b>AI Thinker ESP32-CAM</b> • Libraries: <b>ArduinoJson</b>, <b>base64</b> (built-in <code>esp_camera.h</code>).
+            Set your WiFi SSID/password at the top of the sketch.
           </p>
         </CardContent>
       </Card>
     </div>
   );
 }
+
+const ESP32_SKETCH = `#include "esp_camera.h"
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include "mbedtls/base64.h"
+
+// === USER CONFIG ===
+const char* WIFI_SSID     = "YOUR_WIFI";
+const char* WIFI_PASS     = "YOUR_PASSWORD";
+const char* DEVICE_ID     = "esp32-cam-01";
+const char* INGEST_URL    = "${typeof window !== "undefined" ? "" : ""}${""}";
+// Endpoint: ${"https://ckhfigacvfcsowduvkjj.supabase.co/functions/v1/esp32-ingest"}
+const unsigned long CAPTURE_INTERVAL_MS = 60000; // every 60s
+
+// === AI-Thinker ESP32-CAM pins ===
+#define PWDN_GPIO_NUM 32
+#define RESET_GPIO_NUM -1
+#define XCLK_GPIO_NUM 0
+#define SIOD_GPIO_NUM 26
+#define SIOC_GPIO_NUM 27
+#define Y9_GPIO_NUM 35
+#define Y8_GPIO_NUM 34
+#define Y7_GPIO_NUM 39
+#define Y6_GPIO_NUM 36
+#define Y5_GPIO_NUM 21
+#define Y4_GPIO_NUM 19
+#define Y3_GPIO_NUM 18
+#define Y2_GPIO_NUM 5
+#define VSYNC_GPIO_NUM 25
+#define HREF_GPIO_NUM 23
+#define PCLK_GPIO_NUM 22
+
+bool initCamera() {
+  camera_config_t c = {};
+  c.ledc_channel = LEDC_CHANNEL_0; c.ledc_timer = LEDC_TIMER_0;
+  c.pin_d0=Y2_GPIO_NUM; c.pin_d1=Y3_GPIO_NUM; c.pin_d2=Y4_GPIO_NUM; c.pin_d3=Y5_GPIO_NUM;
+  c.pin_d4=Y6_GPIO_NUM; c.pin_d5=Y7_GPIO_NUM; c.pin_d6=Y8_GPIO_NUM; c.pin_d7=Y9_GPIO_NUM;
+  c.pin_xclk=XCLK_GPIO_NUM; c.pin_pclk=PCLK_GPIO_NUM; c.pin_vsync=VSYNC_GPIO_NUM;
+  c.pin_href=HREF_GPIO_NUM; c.pin_sccb_sda=SIOD_GPIO_NUM; c.pin_sccb_scl=SIOC_GPIO_NUM;
+  c.pin_pwdn=PWDN_GPIO_NUM; c.pin_reset=RESET_GPIO_NUM;
+  c.xclk_freq_hz = 20000000;
+  c.pixel_format = PIXFORMAT_JPEG;
+  // High quality for AI detection
+  if (psramFound()) {
+    c.frame_size = FRAMESIZE_SXGA;   // 1280x1024
+    c.jpeg_quality = 10;             // 0-63, lower = better
+    c.fb_count = 2;
+    c.grab_mode = CAMERA_GRAB_LATEST;
+    c.fb_location = CAMERA_FB_IN_PSRAM;
+  } else {
+    c.frame_size = FRAMESIZE_SVGA;
+    c.jpeg_quality = 12;
+    c.fb_count = 1;
+  }
+  if (esp_camera_init(&c) != ESP_OK) return false;
+
+  // Tune the sensor for sharp, color-accurate leaf photos
+  sensor_t* s = esp_camera_sensor_get();
+  s->set_brightness(s, 1);     // -2..2  (slightly brighter)
+  s->set_contrast(s, 1);       // -2..2
+  s->set_saturation(s, 1);     // -2..2  (greens pop)
+  s->set_sharpness(s, 1);      // -2..2
+  s->set_whitebal(s, 1);       // auto WB on
+  s->set_awb_gain(s, 1);
+  s->set_wb_mode(s, 0);        // 0=auto
+  s->set_exposure_ctrl(s, 1);  // AEC on
+  s->set_aec2(s, 1);
+  s->set_ae_level(s, 0);
+  s->set_gain_ctrl(s, 1);      // AGC on
+  s->set_gainceiling(s, GAINCEILING_4X);
+  s->set_bpc(s, 1);            // black pixel correction
+  s->set_wpc(s, 1);            // white pixel correction
+  s->set_raw_gma(s, 1);
+  s->set_lenc(s, 1);           // lens correction
+  s->set_hmirror(s, 0);
+  s->set_vflip(s, 0);
+  s->set_dcw(s, 1);
+  return true;
+}
+
+String captureBase64() {
+  // Throw away 3 frames so AWB/AEC settle (anti-dark/anti-green-tint)
+  for (int i = 0; i < 3; i++) {
+    camera_fb_t* fb = esp_camera_fb_get();
+    if (fb) esp_camera_fb_return(fb);
+    delay(120);
+  }
+  camera_fb_t* fb = esp_camera_fb_get();
+  if (!fb) return "";
+  size_t outLen = 4 * ((fb->len + 2) / 3) + 1;
+  String out; out.reserve(outLen);
+  unsigned char* buf = (unsigned char*)malloc(outLen);
+  size_t written = 0;
+  mbedtls_base64_encode(buf, outLen, &written, fb->buf, fb->len);
+  for (size_t i = 0; i < written; i++) out += (char)buf[i];
+  free(buf);
+  esp_camera_fb_return(fb);
+  return out;
+}
+
+void sendCapture() {
+  if (WiFi.status() != WL_CONNECTED) return;
+  String b64 = captureBase64();
+  if (b64.length() == 0) { Serial.println("capture failed"); return; }
+
+  DynamicJsonDocument doc(b64.length() + 512);
+  doc["device_id"] = DEVICE_ID;
+  doc["image_base64"] = b64;
+  String body; serializeJson(doc, body);
+
+  HTTPClient http;
+  http.begin(INGEST_URL);
+  http.addHeader("Content-Type", "application/json");
+  int code = http.POST(body);
+  Serial.printf("POST -> %d\\n", code);
+  if (code > 0) Serial.println(http.getString());
+  http.end();
+}
+
+void setup() {
+  Serial.begin(115200);
+  if (!initCamera()) { Serial.println("camera init FAILED"); return; }
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(400); Serial.print("."); }
+  Serial.println("\\nWiFi OK: " + WiFi.localIP().toString());
+  delay(1500); // sensor warm-up
+}
+
+void loop() {
+  sendCapture();
+  delay(CAPTURE_INTERVAL_MS);
+}
+`;
