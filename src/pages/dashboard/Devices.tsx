@@ -452,8 +452,7 @@ const ESP32_SKETCH = `#include "esp_camera.h"
 const char* WIFI_SSID     = "YOUR_WIFI";
 const char* WIFI_PASS     = "YOUR_PASSWORD";
 const char* DEVICE_ID     = "esp32-cam-01";
-const char* INGEST_URL    = "${typeof window !== "undefined" ? "" : ""}${""}";
-// Endpoint: ${"https://ckhfigacvfcsowduvkjj.supabase.co/functions/v1/esp32-ingest"}
+const char* INGEST_URL    = "https://ckhfigacvfcsowduvkjj.supabase.co/functions/v1/esp32-ingest";
 const unsigned long CAPTURE_INTERVAL_MS = 60000; // every 60s
 
 // === AI-Thinker ESP32-CAM pins ===
