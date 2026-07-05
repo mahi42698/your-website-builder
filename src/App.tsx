@@ -12,6 +12,8 @@ import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import Login from "./pages/Login";
 import Overview from "./pages/dashboard/Overview";
 import DiseaseDetection from "./pages/dashboard/DiseaseDetection";
 import Sensors from "./pages/dashboard/Sensors";
@@ -36,7 +38,15 @@ const App = () => (
           <Route path="/knowledge-base" element={<KnowledgeBase />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact-us" element={<ContactUs />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Overview />} />
             <Route path="disease" element={<DiseaseDetection />} />
             <Route path="sensors" element={<Sensors />} />
