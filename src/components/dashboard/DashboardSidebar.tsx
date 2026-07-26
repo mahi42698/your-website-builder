@@ -1,4 +1,4 @@
-import { LayoutDashboard, Leaf, Activity, Cpu, History as HistoryIcon } from "lucide-react";
+import { LayoutDashboard, Leaf, Activity, Cpu, History as HistoryIcon, RadioTower } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -16,6 +16,7 @@ import {
 
 const items = [
   { title: "Overview", titleBn: "ওভারভিউ", url: "/dashboard", icon: LayoutDashboard, end: true },
+  { title: "Live Monitor", titleBn: "লাইভ মনিটর", url: "/dashboard/live", icon: RadioTower },
   { title: "Disease Detection", titleBn: "রোগ শনাক্তকরণ", url: "/dashboard/disease", icon: Leaf },
   { title: "Sensor Monitoring", titleBn: "সেন্সর মনিটরিং", url: "/dashboard/sensors", icon: Activity },
   { title: "Devices", titleBn: "ডিভাইস", url: "/dashboard/devices", icon: Cpu },
