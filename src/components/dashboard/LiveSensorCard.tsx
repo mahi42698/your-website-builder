@@ -11,6 +11,7 @@ type Props = {
   unit: string;
   icon: LucideIcon;
   accent: string;
+  iconColor: string;
   max: number;
   statusLabel: string;
   statusClass: string;
@@ -23,6 +24,7 @@ export function LiveSensorCard({
   unit,
   icon: Icon,
   accent,
+  iconColor,
   max,
   statusLabel,
   statusClass,
@@ -64,7 +66,7 @@ export function LiveSensorCard({
       <CardContent className="pt-5">
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-medium text-muted-foreground">{label}</span>
-          <div className={cn("p-2 rounded-lg", accent, "bg-opacity-10")}>
+          <div className={cn("p-2 rounded-lg bg-muted", iconColor)}>
             <Icon className="w-4 h-4" />
           </div>
         </div>
