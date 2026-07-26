@@ -15,6 +15,7 @@ import { DashboardLayout } from "./components/dashboard/DashboardLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Overview from "./pages/dashboard/Overview";
+import LiveMonitor from "./pages/dashboard/LiveMonitor";
 import DiseaseDetection from "./pages/dashboard/DiseaseDetection";
 import Sensors from "./pages/dashboard/Sensors";
 import Devices from "./pages/dashboard/Devices";
@@ -48,6 +49,7 @@ const App = () => (
             }
           >
             <Route index element={<Overview />} />
+            <Route path="live" element={<LiveMonitor />} />
             <Route path="disease" element={<DiseaseDetection />} />
             <Route path="sensors" element={<Sensors />} />
             <Route path="devices" element={<Devices />} />
