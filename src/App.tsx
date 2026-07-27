@@ -20,6 +20,8 @@ import DiseaseDetection from "./pages/dashboard/DiseaseDetection";
 import Sensors from "./pages/dashboard/Sensors";
 import Devices from "./pages/dashboard/Devices";
 import History from "./pages/dashboard/History";
+import Recommendations from "./pages/dashboard/Recommendations";
+import Notifications from "./pages/dashboard/Notifications";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
 const queryClient = new QueryClient();
@@ -51,6 +53,8 @@ const App = () => (
             <Route index element={<Overview />} />
             <Route path="live" element={<LiveMonitor />} />
             <Route path="disease" element={<DiseaseDetection />} />
+            <Route path="advice" element={<Recommendations />} />
+            <Route path="alerts" element={<Notifications />} />
             <Route path="sensors" element={<Sensors />} />
             <Route path="devices" element={<Devices />} />
             <Route path="history" element={<History />} />
